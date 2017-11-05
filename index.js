@@ -23,8 +23,8 @@ app.post('/sendLocation', function(request, response) {
     var theLogin = request.body.login;
     var theLat = request.body.lat;
     var theLng = request.body.lng;
-    var returnObject = {"login":theLogin,"lat":theLat,"lng":theLng};
-    response.send(returnObject);
+    //var returnObject = {"login":theLogin,"lat":theLat,"lng":theLng};
+    response.send('{"people":[],"landmarks":[]}');
 });
 
 app.listen(process.env.PORT || 8888);
