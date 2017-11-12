@@ -1,10 +1,14 @@
 var bodyParser = require('body-parser'); 
 var express = require('express');
-var cors = require('cors'); /* to enable CORS */
+var cors = require('cors');                     /* to enable CORS */
 var app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.get('/', function(request, response) {
+    response.send('Web server running');
+}); 
 
 app.post('/sendLocation', cors(), function(request, response) {
 
