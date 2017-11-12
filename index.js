@@ -7,7 +7,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/', function(request, response) {
-    response.send('Web server running');
+    response.send('Web server up and running');
 }); 
 
 app.post('/sendLocation', cors(), function(request, response) {
