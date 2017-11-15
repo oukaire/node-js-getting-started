@@ -1,21 +1,26 @@
 var bodyParser = require('body-parser'); 
-var express = require('express');
+var express = require('express');               /* to make app */
 var cors = require('cors');                     /* to enable CORS */
 var app = express();
 
-function validReq(login, lat, lng) 
+function validReq(login, lat, lng)              /* validates credentials */
 {
+    if (login == '') return 0;
     if (lat < -90 || lat > 90) return 0;
     if (lng < -180 || lng > 180) return 0;
-    if (login == '') return 0;
     return 1;
 }
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(__dirname + '/public'));
+
+app.get('/checkins.json', function(request, response) {
+    response.send('you are trying to get checkins?');
+});
 
 app.get('/', function(request, response) {
-    response.send('Assignment 3 server up and running');
+    response.render('index.html');
 }); 
 
 app.post('/sendLocation', cors(), function(request, response) {
@@ -23,6 +28,7 @@ app.post('/sendLocation', cors(), function(request, response) {
     var theLogin = request.body.login;
     var theLat = request.body.lat;
     var theLng = request.body.lng;
+    var theDate = new Date();           /* for created_at */
     var resObj = '';
 
     if (validReq(theLogin, theLat, theLng) == 0) {
@@ -31,7 +37,9 @@ app.post('/sendLocation', cors(), function(request, response) {
     else {
         returnObject = {"login":theLogin,"lat":theLat,"lng":theLng};
         resObj = {"people":[returnObject],"landmarks":0};
-        response.send(JSON.stringify(resObj));
+
+        /* dont use : JSON.stringify(resObj) */
+        response.send(resObj);
     }
 });
 

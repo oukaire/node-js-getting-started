@@ -1,6 +1,6 @@
-# Lab7 node-js-getting-started
+# Assignment3:landmarkz, a server for Assignment2:landmarks
 -------------------------------------------------------------------------
-Author: Onyi Ukay
+by Onyi Ukay
 Last Updated: November 5, 2017
 -------------------------------------------------------------------------
 
@@ -15,12 +15,9 @@ HTML5 files
 
 Javascripts
 * landmarks.js
-* meters_to_miles.js
 
 CSS stylesheets
 * geolocation.css
-* gmap_api.css
-
 
 # Hours spent on Learning, Designing & Implementing
 5 hours
@@ -31,5 +28,8 @@ The Documentations at:
 - [Getting Started with Node.js on Heroku](https://devcenter.heroku.com/articles/getting-started-with-nodejs)
 - [Heroku Node.js Support](https://devcenter.heroku.com/articles/nodejs-support)
 - [Node.js on Heroku](https://devcenter.heroku.com/categories/nodejs)
-
+- [Validator Software](https://github.com/chriso/validator.js)
+- [Mongo Database](https://github.com/mongodb/node-mongodb-native)
+- [BodyParser]()
+- [Ming's nodemongoapp](https://github.com/tuftsdev/WebProgramming/blob/gh-pages/examples/nodejs/nodemongoapp/server.js)
 
