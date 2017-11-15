@@ -20,7 +20,7 @@ CSS stylesheets
 * geolocation.css
 
 # Hours spent on Learning, Designing & Implementing
-5 hours
+6 hours
 
 # Credits
 

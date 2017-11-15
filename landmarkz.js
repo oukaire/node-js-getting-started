@@ -33,29 +33,35 @@ app.post('/sendLocation', function(request, response) { /* TODO: status code */
     var theLat = request.body.lat;
     var theLng = request.body.lng;
     var resObj = '';
+    var done = 0;
 
-    if (!validateCheckIn(theLogin, theLat, theLng)) {
+    if (!validCheckIn(theLogin, theLat, theLng)) {
         response.send('{"error":"Whoops, something is wrong with your data!"}');
     } 
     else {
         theLat = v.toFloat(theLat);
         theLng = v.toFloat(theLng);
-
         resObj = {"login":theLogin,"lat":theLat,"lng":theLng,"created_at":theDate};
         writeToDatabase(db, resObj);
-        resObj = readFromDatabase(db);
-        db.close();                             /* REM to CLOSE db */
-        response.send(resObj);
+
+        resObj = {"people":[],"sleeptime":[]};      /* TODO */
+
+        Object.keys(resObj).forEach(key => {
+            readFromDatabase(db, key, function(collection, itsList) {
+                resObj[collection] = itsList;
+                if (done) response.send(JSON.stringify(resObj));
+                done++;
+            });
+        });
     }
 });
 
 app.listen(process.env.PORT || 8888);
 
-
 /**************************************************************
  *  put in a package perhaps? Make cleaner
  *************************************************************/
-function validateCheckIn(login, lat, lng)
+function validCheckIn(login, lat, lng)
 {
     if (login == '') return 0;
     if (!v.isFloat(lat, {min:-90, max:90}) || !v.isFloat(lng, {min:-180, max:180})) return 0;
@@ -72,9 +78,14 @@ function writeToDatabase(db, toInsert)
     });
 }
 
-function readFromDatabase(db)
+function readFromDatabase(db, col, fn)
 {
-    return '(^-^)';   
+    db.collection(col, function(e, collection) { 
+        assert.equal(e, null);
+        collection.find().toArray(function(e, arr) {
+            assert.equal(e, null);
+            fn(col, arr);
+        });
+    });
 }
-
 
