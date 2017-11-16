@@ -15,6 +15,8 @@ var MongoClient = require('mongodb').MongoClient,
     assert = require('assert');
 var mongoUri = process.env.MONGODB_URI || process.env.MONGOLAB_URI || 'mongodb://localhost/landmarkz';
 var db = MongoClient.connect(mongoUri, function(error, database) { assert.equal(null, error); db = database; });
+var theLat = 9999;
+var theLng = 9999;
 
 /* REMEMBER TO CLOSE db : db.close() */
 
@@ -30,10 +32,10 @@ app.post('/sendLocation', function(request, response) { /* TODO: status code */
 
     const theDate = new Date();
     const theLogin = request.body.login;
-    var theLat = request.body.lat;
-    var theLng = request.body.lng;
+    theLat = request.body.lat;
+    theLng = request.body.lng;
     var resObj = '';
-    var done = 0;
+    var done = 0; /* bool */
 
     if (!validCheckIn(theLogin, theLat, theLng)) {
         response.send('{"error":"Whoops, something is wrong with your data!"}');
@@ -42,12 +44,12 @@ app.post('/sendLocation', function(request, response) { /* TODO: status code */
         theLat = v.toFloat(theLat);
         theLng = v.toFloat(theLng);
         resObj = {"login":theLogin,"lat":theLat,"lng":theLng,"created_at":theDate};
-        writeToDatabase(db, resObj);
+        writeCollection(db, 'people', resObj);
 
-        resObj = {"people":[],"sleeptime":[]};      /* TODO */
+        resObj = {'people':[],'landmarks':[]};      /* TODO */
 
         Object.keys(resObj).forEach(key => {
-            readFromDatabase(db, key, function(collection, itsList) {
+            readCollection(db, key, function(collection, itsList) {
                 resObj[collection] = itsList;
                 if (done) response.send(JSON.stringify(resObj));
                 done++;
@@ -58,9 +60,7 @@ app.post('/sendLocation', function(request, response) { /* TODO: status code */
 
 app.listen(process.env.PORT || 8888);
 
-/**************************************************************
- *  put in a package perhaps? Make cleaner
- *************************************************************/
+
 function validCheckIn(login, lat, lng)
 {
     if (login == '') return 0;
@@ -68,24 +68,37 @@ function validCheckIn(login, lat, lng)
     return 1;
 }
 
-function writeToDatabase(db, toInsert)
+function writeCollection(db, col, toInsert)
 {
-    var people = db.collection('checkins');
-
-    people.insert(toInsert, function(e, result) {
+    db.collection(col).insert(toInsert, function(e, result) {
         assert.equal(e, null);
         assert.equal(1, result.result.n);
     });
 }
 
-function readFromDatabase(db, col, fn)
+function readCollection(db, col, fn)
 {
-    db.collection(col, function(e, collection) { 
+    function WithinAMile(e, collection) {
+        assert.equal(e, null);
+        collection.find({geometry:{$near:{$geometry:{type:"Point",coordinates:[theLng,theLat]},$minDistance: 1000,$maxDistance: 11609.34}}}).toArray(function(e, arr) {
+            assert.equal(e, null);
+            fn(col, arr);
+        });
+    }
+
+    function getPpl(e, collection) {
         assert.equal(e, null);
         collection.find().toArray(function(e, arr) {
             assert.equal(e, null);
             fn(col, arr);
         });
-    });
-}
+    }
 
+    if (col == 'landmarks') {
+        db.collection(col).createIndex({'geometry':"2dsphere"}, function(e, index) { 
+            assert.equal(e, null);
+            db.collection('landmarks', WithinAMile);
+        });
+    }
+    else db.collection(col, getPpl); 
+}
