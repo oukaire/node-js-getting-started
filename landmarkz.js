@@ -80,7 +80,7 @@ function readCollection(db, col, fn)
 {
     function WithinAMile(e, collection) {
         assert.equal(e, null);
-        collection.find({geometry:{$near:{$geometry:{type:"Point",coordinates:[theLng,theLat]},$minDistance: 1000,$maxDistance: 11609.34}}}).toArray(function(e, arr) {
+        collection.find({geometry:{$near:{$geometry:{type:"Point",coordinates:[theLng,theLat]},$minDistance: 1000,$maxDistance: 1609.34}}}).toArray(function(e, arr) {
             assert.equal(e, null);
             fn(col, arr);
         });
