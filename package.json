@@ -5,7 +5,7 @@
   "engines": {
     "node": "6.11.1"
   },
-  "main": "index.js",
+  "main": "landmarkz.js",
   "scripts": {
     "start": "node landmarkz.js",
     "test": "node test.js"

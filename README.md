@@ -10,7 +10,7 @@ This application supports the [Getting Started with Node on Heroku](https://devc
 
 # Implemented:
 
-HTML5 files
+public folder contains all HTML5 files
 * index.html
 
 Javascripts
@@ -19,10 +19,14 @@ Javascripts
 CSS stylesheets
 * geolocation.css
 
+
 # Hours spent on Learning, Designing & Implementing
 8 hours
 
 # Credits
+
+Honorable Mention : Toby Glover for affording me a tutorial on ejs
+also found out about his cool [Wikilinks](wikilinks.io) project
 
 The Documentations at:
 - [Getting Started with Node.js on Heroku](https://devcenter.heroku.com/articles/getting-started-with-nodejs)

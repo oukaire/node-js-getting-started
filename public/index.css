@@ -1,0 +1,8 @@
+body {
+    font-family: Comic-sans;
+    background-color: azure;
+}
+
+h1, #log {
+    text-align: center;
+}
