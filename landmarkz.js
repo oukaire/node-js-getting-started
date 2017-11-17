@@ -41,70 +41,58 @@ app.get('/', function(request, response) {
     );
 });
 
-app.post('/sendLocation', function(request, response) { /* TODO: status code */
+app.post('/sendLocation', function(request, response) { /* TODO: STATUS CODE */
 
     const theDate = new Date();
     theLogin = request.body.login;
     theLat = request.body.lat;
     theLng = request.body.lng;
-    var resObj = '';
+    var theObj = '';
     var done = 0;
 
-    if (!validCheckIn(theLat, theLng)) {
+    if (theLogin == '' || !v.isFloat(theLat, {min:-90, max:90}) || !v.isFloat(theLng, {min:-180, max:180})) {
         response.send('{"error":"Whoops, something is wrong with your data!"}');
     } 
     else {
         theLat = v.toFloat(theLat);
         theLng = v.toFloat(theLng);
-        resObj = {"login":theLogin,"lat":theLat,"lng":theLng,"created_at":theDate};
+        theObj = {'login':theLogin,'lat':theLat,'lng':theLng,'created_at':theDate};
         
-        writeCollection('people', resObj);
-        resObj = {'people':[],'landmarks':[]};
+        db.collection('people').insert(theObj, function(e, obj) {
+            if (e || obj.result.n != 1) response.send(500);
+        });
+        
+        theObj = {'people':[],'landmarks':[]};
 
-        Object.keys(resObj).forEach(key => {
+        Object.keys(theObj).forEach(key => {
             toFind = (key == 'people') ? (null) : ({geometry:{$near:{$geometry:{type:"Point",coordinates:[theLng,theLat]},$minDistance: 1,$maxDistance: 1609.34}}});
-            readCollection(key, toFind, function(collection, itsList) {
-                resObj[collection] = itsList;
-                if (done) response.send(resObj), done++;
-                console.log("LISTING");
+            readCollection(key, toFind, function(e, key, itsList) {
+                if (e) response.status(500);
+                theObj[key] = itsList;
+                if (done) response.send(theObj);
+                done++;
             });
         });
-    }
+    } 
 });
 
 app.listen(process.env.PORT || 8888);
 
-
-function validCheckIn(lat, lng)
-{
-    if (theLogin == '') return 0;
-    if (!v.isFloat(lat, {min:-90, max:90}) || !v.isFloat(lng, {min:-180, max:180})) return 0;
-    return 1;
-}
-
-function writeCollection(col, toInsert)
-{
-    db.collection(col).insert(toInsert, function(e, result) {
-        assert.equal(e, null);
-        assert.equal(1, result.result.n);
-    });
-}
-
-function readCollection(col, searchKey, fn)
+function readCollection(coll, searchKey, fn)
 {
     function getList(e, collection) {
-        assert.equal(e, null);
+        if (e) fn(e, coll, []);
         collection.find(searchKey).toArray(function(e, arr) {
-            assert.equal(e, null);
-            fn(col, arr);
+            if (e) fn(e, coll, []);
+            fn(null, coll, arr);
         });
     }
 
-    if (col == 'landmarks') {
-        db.collection(col).createIndex({'geometry':"2dsphere"}, function(e, _) { 
-            assert.equal(e, null);
-            db.collection(col, getList);
+    if (coll === 'landmarks') {
+        db.collection(coll).createIndex({'geometry':"2dsphere"}, function(e, ind) { 
+            if (e) fn(e, coll, []);
+            db.collection(coll, getList);
         });
     }
-    else db.collection(col, getList); 
+    else db.collection(coll, getList); 
 }
