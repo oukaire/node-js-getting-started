@@ -1,1 +1,1 @@
-web: node landmarkz.js
+web: node index.js

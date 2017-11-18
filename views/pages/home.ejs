@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home</title>
+  <link rel="stylesheet" type="text/css" href="home.css"/>
+</head>
+<body>
+  <h1>All Check-Ins In Descending Order by Timestamp</h1>
+  <% log.forEach(checkin => { %>
+    <div id="log">
+      <%= checkin.login + " checked in at " + checkin.lat + ", " + checkin.lng + " on " + checkin.created_at %><br/>
+    </div>
+  <% }) %>
+</body>
+</html>

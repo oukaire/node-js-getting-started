@@ -3,6 +3,7 @@
 const bodyParser = require('body-parser');
 const express = require('express');
 const cors = require('cors');
+const read = require('./readFromDatabase.js');
 const app = express();
 const v = require('validator');
 
@@ -26,7 +27,7 @@ app.get('/checkins.json', function(request, response) {
     theLogin = request.query.login;
     if (theLogin === '') response.send([]);
     else {
-        readCollection('people', {'login':theLogin}, function(e, collection, itsList) {
+        read.collection(db, 'people', {'login':theLogin}, function(e, collection, itsList) {
             if (e) throw e;
             response.send(itsList);
         });
@@ -37,7 +38,7 @@ app.get('/', function(request, response) {
     db.collection('people').find().sort({ 'created_at': -1 }).toArray(
         function(e, list) {
             if (e) throw e;
-            response.render('pages/homepage', { log: list });
+            response.render('pages/home', { log: list });
         } 
     );
 });
@@ -48,8 +49,8 @@ app.post('/sendLocation', function(request, response) { /* TODO: STATUS CODE */
     theLogin = request.body.login;
     theLat = request.body.lat;
     theLng = request.body.lng;
-    var theObj = '';
-    var done = 0;
+    var theObj = '',
+        done = 0;
 
     if (theLogin == '' || !v.isFloat(theLat, {min:-90, max:90}) || !v.isFloat(theLng, {min:-180, max:180})) {
         response.send('{"error":"Whoops, something is wrong with your data!"}');
@@ -60,15 +61,15 @@ app.post('/sendLocation', function(request, response) { /* TODO: STATUS CODE */
         theObj = {'login':theLogin,'lat':theLat,'lng':theLng,'created_at':theDate};
         
         db.collection('people').insert(theObj, function(e, obj) {
-            if (e || obj.result.n != 1) response.send(500);
+            if (e || obj.result.n != 1) response.sendStatus(500);
         });
         
         theObj = {'people':[],'landmarks':[]};
 
         Object.keys(theObj).forEach(key => {
-            toFind = (key == 'people') ? (null) : ({geometry:{$near:{$geometry:{type:"Point",coordinates:[theLng,theLat]},$minDistance: 1,$maxDistance: 1609.34}}});
-            readCollection(key, toFind, function(e, key, itsList) {
-                if (e) response.status(500);
+            toFind = (key == 'people') ? (null) : ({geometry:{$near:{$geometry:{type:"Point",coordinates:[theLng,theLat]},$minDistance: 0,$maxDistance: 1609.34}}});
+            read.collection(db, key, toFind, function(e, key, itsList) {
+                if (e) throw e;
                 theObj[key] = itsList;
                 if (done) response.send(theObj);
                 done++;
@@ -78,22 +79,3 @@ app.post('/sendLocation', function(request, response) { /* TODO: STATUS CODE */
 });
 
 app.listen(process.env.PORT || 8888);
-
-function readCollection(coll, searchKey, fn)
-{
-    function getList(e, collection) {
-        if (e) fn(e, coll, []);
-        collection.find(searchKey).toArray(function(e, arr) {
-            if (e) fn(e, coll, []);
-            fn(null, coll, arr);
-        });
-    }
-
-    if (coll === 'landmarks') {
-        db.collection(coll).createIndex({'geometry':"2dsphere"}, function(e, _) { 
-            if (e) fn(e, coll, []);
-            db.collection(coll, getList);
-        });
-    }
-    else db.collection(coll, getList); 
-}
