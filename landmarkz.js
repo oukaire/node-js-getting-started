@@ -18,15 +18,16 @@ var MongoClient = require('mongodb').MongoClient,
 var mongoUri = process.env.MONGODB_URI || process.env.MONGOLAB_URI || 'mongodb://localhost/landmarkz';
 var db = MongoClient.connect(mongoUri, function(e, database) { assert.equal(null, e); db = database; });
 var theLogin = '';
-var theLat = '00';
-var theLng = '00';
+var theLat = '';
+var theLng = '';
 var toFind = null;
 
 app.get('/checkins.json', function(request, response) {
     theLogin = request.query.login;
-    if (!validCheckIn('0', '0')) response.send([]);
+    if (theLogin === '') response.send([]);
     else {
-        readCollection('people', {'login':theLogin}, function(collection, itsList) {
+        readCollection('people', {'login':theLogin}, function(e, collection, itsList) {
+            if (e) throw e;
             response.send(itsList);
         });
     }
@@ -89,7 +90,7 @@ function readCollection(coll, searchKey, fn)
     }
 
     if (coll === 'landmarks') {
-        db.collection(coll).createIndex({'geometry':"2dsphere"}, function(e, ind) { 
+        db.collection(coll).createIndex({'geometry':"2dsphere"}, function(e, _) { 
             if (e) fn(e, coll, []);
             db.collection(coll, getList);
         });
