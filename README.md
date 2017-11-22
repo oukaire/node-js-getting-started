@@ -27,7 +27,7 @@ It was implemented to practice how to split server files across multiple documen
 # Credits
 
 A **Shout-Out** to Toby Glover for affording me a tutorial on ejs. 
-Also found out about his comp20 project: [Wikilinks](wikilinks.io) - check it out! 
+Also found out about his comp20 project: [Wikilinks](http://wikilinks.io/) - check it out! 
 
 The Documentations at:
 - [Getting Started with Node.js on Heroku](https://devcenter.heroku.com/articles/getting-started-with-nodejs)
